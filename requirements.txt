@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+aiosqlite
+jinja2
+python-multipart
+feedparser
+httpx
+openai
+apscheduler
+python-dotenv
+beautifulsoup4
+pydantic-settings
+python-dateutil
+greenlet

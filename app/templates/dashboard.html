@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - RSS Feed Tracker{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <button onclick="runPipeline()" id="runBtn"
+                class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg
+                       font-medium text-sm transition shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Şimdi Çalıştır
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="text-sm font-medium text-gray-500 mb-1">Toplam Feed</div>
+            <div class="text-3xl font-bold text-brand-700" id="totalFeeds">{{ stats.total_feeds }}</div>
+            <div class="text-xs text-gray-400 mt-1">{{ stats.active_feeds }} aktif</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="text-sm font-medium text-gray-500 mb-1">Bugün Çekilen</div>
+            <div class="text-3xl font-bold text-emerald-600" id="todayArticles">{{ stats.today_articles }}</div>
+            <div class="text-xs text-gray-400 mt-1">makale</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="text-sm font-medium text-gray-500 mb-1">Özetlenen</div>
+            <div class="text-3xl font-bold text-amber-600" id="todaySummarized">{{ stats.today_summarized }}</div>
+            <div class="text-xs text-gray-400 mt-1">makale</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <div class="text-sm font-medium text-gray-500 mb-1">Telegram'a Gönderilen</div>
+            <div class="text-3xl font-bold text-purple-600" id="todaySent">{{ stats.today_sent }}</div>
+            <div class="text-xs text-gray-400 mt-1">makale</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-900">Bugünün Makaleleri</h2>
+        </div>
+        <div class="divide-y divide-gray-50" id="articlesList">
+            {% if articles %}
+                {% for a in articles %}
+                <div class="px-6 py-4 hover:bg-gray-50 transition" id="article-row-{{ a.id }}">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700">{{ a.feed_name }}</span>
+                                {% if a.is_sent_to_telegram %}
+                                <span class="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-green-50 text-green-700">Gönderildi</span>
+                                {% elif a.summary %}
+                                <span class="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-700">Özetlendi</span>
+                                {% else %}
+                                <span class="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-500">Bekliyor</span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ a.url }}" target="_blank"
+                               class="text-sm font-medium text-gray-900 hover:text-brand-600 transition line-clamp-1">{{ a.title }}</a>
+                            {% if a.summary %}
+                            <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ a.summary }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                            <div class="text-xs text-gray-400 whitespace-nowrap">
+                                {{ a.fetched_at.strftime('%H:%M') }}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                {% if not a.summary %}
+                                <button onclick="summarizeArticle({{ a.id }}, this)"
+                                        class="text-xs text-amber-600 hover:text-amber-800 font-medium transition whitespace-nowrap">Özetle</button>
+                                {% else %}
+                                <button onclick="summarizeArticle({{ a.id }}, this)"
+                                        class="text-xs text-gray-400 hover:text-amber-600 font-medium transition whitespace-nowrap">Tekrar Özetle</button>
+                                {% endif %}
+                                {% if a.summary and not a.is_sent_to_telegram %}
+                                <button onclick="sendArticle({{ a.id }}, this)"
+                                        class="text-xs text-purple-600 hover:text-purple-800 font-medium transition whitespace-nowrap">Gönder</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="px-6 py-12 text-center text-gray-400">
+                    <p>Henüz bugün için makale yok. "Şimdi Çalıştır" butonuna tıklayın veya bir sonraki saatlik çalışmayı bekleyin.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function runPipeline() {
+    const btn = document.getElementById('runBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Çalışıyor...`;
+    try {
+        const resp = await fetch('/api/pipeline/run', { method: 'POST' });
+        const data = await resp.json();
+        alert(`Tamamlandı!\nYeni makale: ${data.fetched}\nÖzetlenen: ${data.summarized}\nGönderilen: ${data.sent}`);
+        location.reload();
+    } catch(e) {
+        alert('Hata: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Şimdi Çalıştır`;
+    }
+}
+
+async function summarizeArticle(id, btn) {
+    const orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Özetleniyor...';
+    try {
+        const resp = await fetch(`/api/articles/${id}/summarize`, { method: 'POST' });
+        if (resp.ok) {
+            location.reload();
+        } else {
+            const data = await resp.json();
+            alert(data.detail || 'Özetleme başarısız');
+        }
+    } catch(e) { alert('Hata: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = orig; }
+}
+
+async function sendArticle(id, btn) {
+    const orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Gönderiliyor...';
+    try {
+        const resp = await fetch(`/api/articles/${id}/send`, { method: 'POST' });
+        if (resp.ok) {
+            location.reload();
+        } else {
+            const data = await resp.json();
+            alert(data.detail || 'Gönderim başarısız');
+        }
+    } catch(e) { alert('Hata: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = orig; }
+}
+</script>
+{% endblock %}

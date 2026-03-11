@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RSS Feed Tracker{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a5f' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="h-full bg-gray-50 text-gray-800">
+    <div class="min-h-full">
+        <nav class="bg-brand-900 shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-7 h-7 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 110-2 1 1 0 010 2z"/>
+                        </svg>
+                        <span class="text-white text-xl font-bold tracking-tight">RSS Feed Tracker</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <a href="/" class="nav-link px-4 py-2 rounded-lg text-sm font-medium
+                            {% if active_page == 'dashboard' %}bg-brand-700 text-white{% else %}text-blue-100 hover:bg-brand-800 hover:text-white{% endif %}
+                            transition">Dashboard</a>
+                        <a href="/feeds" class="nav-link px-4 py-2 rounded-lg text-sm font-medium
+                            {% if active_page == 'feeds' %}bg-brand-700 text-white{% else %}text-blue-100 hover:bg-brand-800 hover:text-white{% endif %}
+                            transition">Feeds</a>
+                        <a href="/settings" class="nav-link px-4 py-2 rounded-lg text-sm font-medium
+                            {% if active_page == 'settings' %}bg-brand-700 text-white{% else %}text-blue-100 hover:bg-brand-800 hover:text-white{% endif %}
+                            transition">Ayarlar</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
